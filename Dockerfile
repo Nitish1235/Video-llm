@@ -47,7 +47,7 @@ ENV STORAGE_TYPE=gcs \
     RUNPOD_HANDLER=handler.handler
 
 # Runpod serverless automatically invokes handler.handler based on RUNPOD_HANDLER env var
-# Container just needs to stay alive - Runpod runtime handles the rest
-# Using sleep to keep container running (Runpod will call handler when requests arrive)
-CMD ["sleep", "infinity"]
+# Import handler module to trigger initialization logging and verify it loads correctly
+# Container stays alive - Runpod runtime will call handler when requests arrive
+CMD ["python", "-c", "import handler; import time; print('Handler module loaded successfully. Container ready for requests.'); time.sleep(999999)"]
 

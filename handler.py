@@ -47,6 +47,13 @@ RESOLUTION_MAP: Dict[str, Tuple[int, int]] = {
     "1:1": (1080, 1080),
 }
 
+# Initialize logging first
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+)
+logger = logging.getLogger("hunyuan_video_service")
+
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 PIPELINES: Dict[str, Any] = {}
 PIPELINE_LOCK = Lock()  # Thread-safe access to PIPELINES dict
@@ -120,12 +127,6 @@ def wait_for_gpu_memory(timeout: float = 300.0) -> bool:
             return True
         time.sleep(MEMORY_CHECK_INTERVAL)
     return False
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
-)
-logger = logging.getLogger("hunyuan_video_service")
 
 
 def setup_gcs_credentials() -> bool:
@@ -893,6 +894,20 @@ def _process_request(
     }
     return {"output": response}
 
+
+# Initialize logging and verify handler is ready
+logger.info("=" * 60)
+logger.info("HunyuanVideo Service Handler Initialized")
+logger.info(f"Storage Type: {STORAGE_TYPE}")
+logger.info(f"Video Model: {VIDEO_MODEL_NAME}")
+logger.info(f"Max Concurrent Generations: {MAX_CONCURRENT_GENERATIONS}")
+logger.info(f"Device: {DEVICE}")
+if torch.cuda.is_available():
+    gpu_name = torch.cuda.get_device_name(0)
+    gpu_memory = torch.cuda.get_device_properties(0).total_memory / (1024**3)
+    logger.info(f"GPU: {gpu_name} ({gpu_memory:.1f}GB)")
+logger.info("Handler ready. Waiting for requests...")
+logger.info("=" * 60)
 
 if __name__ == "__main__":
     # Simple local smoke test harness (no real model call)
