@@ -29,7 +29,7 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 
 RUN mkdir -p /cache/huggingface /cache/torch
 
-# Optional: warm up model weights into the image (best-effort, non-fatal)
+# Optional: warm up HunyuanVideo model weights into the image (best-effort, non-fatal)
 RUN python - << "EOF" || true
 import torch
 from diffusers import HunyuanVideoPipeline
@@ -37,12 +37,12 @@ try:
     model_id = "tencent/HunyuanVideo-1.5"
     HunyuanVideoPipeline.from_pretrained(model_id, torch_dtype=torch.float16)
 except Exception as e:
-    print("Model pre-download failed (will download at runtime):", e)
+    print("HunyuanVideo model pre-download failed (will download at runtime):", e)
 EOF
 
 COPY handler.py /app/handler.py
 
-ENV STORAGE_TYPE=s3 \
+ENV STORAGE_TYPE=gcs \
     RUNPOD_HANDLER=handler.handler
 
 CMD ["python", "-m", "runpod"]
