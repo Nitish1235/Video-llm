@@ -654,12 +654,19 @@ def build_error(code: str, message: str) -> Dict[str, Any]:
 
 
 def handler(event: Dict[str, Any]) -> Dict[str, Any]:
-    """Main handler with concurrency control and request tracking."""
+    """Main handler with concurrency control and request tracking.
+    
+    This function is called by Runpod serverless runtime.
+    Ensure RUNPOD_HANDLER=handler.handler is set in Runpod template.
+    """
     start_time = time.time()
     tmp_files: list[str] = []
     request_id = str(uuid.uuid4())[:8]
     
+    # Log immediately to confirm handler is being called
+    print(f"🔔 HANDLER CALLED! Request ID: {request_id}")
     logger.info(f"[Request {request_id}] Starting video generation request")
+    logger.info(f"[Request {request_id}] Received event: {json.dumps(event, indent=2)[:500]}")  # Log first 500 chars
 
     try:
         if not validate_api_key(event):
@@ -908,11 +915,13 @@ logger.info(f"Storage Type: {STORAGE_TYPE}")
 logger.info(f"Video Model: {VIDEO_MODEL_NAME}")
 logger.info(f"Max Concurrent Generations: {MAX_CONCURRENT_GENERATIONS}")
 logger.info(f"Device: {DEVICE}")
+logger.info(f"RUNPOD_HANDLER env var: {os.getenv('RUNPOD_HANDLER', 'NOT SET - THIS IS THE PROBLEM!')}")
 if torch.cuda.is_available():
     gpu_name = torch.cuda.get_device_name(0)
     gpu_memory = torch.cuda.get_device_properties(0).total_memory / (1024**3)
     logger.info(f"GPU: {gpu_name} ({gpu_memory:.1f}GB)")
 logger.info("Handler ready. Waiting for requests...")
+logger.info(f"Handler function available: handler.handler")
 logger.info("=" * 60)
 
 if __name__ == "__main__":
