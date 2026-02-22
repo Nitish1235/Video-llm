@@ -212,13 +212,16 @@ def get_pipeline(model_name: str) -> HunyuanVideoPipeline:
             hf_id = f"tencent/{hf_id}"
 
         logger.info(f"Loading HunyuanVideo pipeline: {hf_id} on device={DEVICE}")
+        logger.info(f"This may take several minutes on first load (downloading ~8-15GB model from HuggingFace)...")
         start = time.time()
 
         try:
+            logger.info(f"Starting model download from HuggingFace Hub...")
             pipe = HunyuanVideoPipeline.from_pretrained(
                 hf_id,
                 torch_dtype=torch.float16 if DEVICE == "cuda" else torch.float32,
             )
+            logger.info(f"Model downloaded successfully, now loading to GPU...")
             if hasattr(pipe, "enable_attention_slicing"):
                 pipe.enable_attention_slicing()  # type: ignore[attr-defined]
             pipe.to(DEVICE)
