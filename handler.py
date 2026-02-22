@@ -224,10 +224,13 @@ def get_pipeline(model_name: str) -> HunyuanVideoPipeline:
             logger.info(f"Model downloaded successfully, now loading to GPU...")
             if hasattr(pipe, "enable_attention_slicing"):
                 pipe.enable_attention_slicing()  # type: ignore[attr-defined]
+            
+            logger.info(f"⏳ Moving model to GPU ({DEVICE})...")
             pipe.to(DEVICE)
+            logger.info(f"✅ Model loaded to GPU successfully")
 
             load_time = time.time() - start
-            logger.info(f"Loaded model {hf_id} in {load_time:.2f}s")
+            logger.info(f"🎉 Model fully loaded in {load_time:.1f}s ({load_time/60:.1f} minutes total)")
 
             if torch.cuda.is_available():
                 total = torch.cuda.get_device_properties(0).total_memory / (1024**3)
