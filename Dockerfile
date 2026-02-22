@@ -46,5 +46,8 @@ COPY handler.py /app/handler.py
 ENV STORAGE_TYPE=gcs \
     RUNPOD_HANDLER=handler.handler
 
-CMD ["python", "-m", "runpod"]
+# Runpod serverless automatically invokes handler.handler based on RUNPOD_HANDLER env var
+# Container just needs to stay alive - Runpod runtime handles the rest
+# Using sleep to keep container running (Runpod will call handler when requests arrive)
+CMD ["sleep", "infinity"]
 
